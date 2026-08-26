@@ -36,19 +36,19 @@ One bullet — it is the only user-observable, non-obvious risk. No step-by-step
 ## Safety story
 
 **What gives confidence**
-- I reproduced the original logout on a device, then confirmed the fix keeps the session alive across an expiry.
-- Change is scoped to the auth interceptor; no other call sites touched.
+- I reproduced the logout on a device and confirmed the fix survives an expiry.
+- Scoped to the auth interceptor; no other call sites touched.
 
 **Risks to review**
-- The retry is not covered by an automated test; the retry-once guard is verified only by my manual run.
-- Behavior change on the auth path — worth a second look at the loop guard so a persistently invalid token can't retry forever.
+- No automated coverage for the retry path.
+- Check the loop guard: a persistently invalid token must not retry forever.
 
 ## Technical Summary
 
-The auth interceptor now treats an "invalid token" response as a signal to re-fetch the SSO token once and retry the original request, rather than surfacing the failure. A one-shot guard prevents a refetch loop when the refreshed token is also rejected.
+Re-fetches once and retries on an invalid-token response instead of surfacing the failure; a one-shot guard prevents a refetch loop when the refreshed token is also rejected.
 ```
 
-Note what is **absent**: no Product Description (no new user-facing capability — a bug fix, covered by the release note), no Automated test coverage section (no tests added), no Labels/Review section, no file-by-file walkthrough. Each omitted section is dropped whole, not filled with filler.
+Safety story 49 words (budget 55), Technical Summary 30 (budget 40), body 79 (ceiling 120). Note what is **absent**: no Product Description (no new user-facing capability — a bug fix, covered by the release note), no Automated test coverage section (no tests added), no Labels/Review section, no file-by-file walkthrough. Each omitted section is dropped whole, not filled with filler.
 
 ## Calibration: applying the diff test to a Technical Summary
 
@@ -60,7 +60,7 @@ Run the diff test on each clause. The event name, the param name, the action val
 
 > ✅ Uses one event with an action parameter rather than one event per action. Screen opens and email verification are excluded — the auto `SCREEN_VIEW` and `OTP_REQUESTED` events already cover them, so logging them here would double-count.
 
-Two sentences, zero restatement.
+60 words down to 36, zero restatement — and the 40-word budget is the backstop, not the goal.
 
 ## Suggested Review Order comment
 
