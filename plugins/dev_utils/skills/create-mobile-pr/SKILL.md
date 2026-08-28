@@ -7,11 +7,9 @@ description: Use when creating, opening, or submitting a pull request in a Dimag
 
 Open a **draft** PR with a JIRA-prefixed title, a description built from the repo's PR template, and `--assignee "@me"`. The user reviews and marks it ready on GitHub. Release/QA notes go in `RELEASES.md`, not the PR body.
 
-Every artifact below has a **recipe** (what it contains) and a **budget** (how long it may be). Fill the recipe with true statements up to the budget, then stop. Write to that shape — do not treat the budget as a target to reach. An artifact that would be empty is omitted entirely, heading and all.
+Every artifact below has a **recipe** (what it contains) and a **budget** (how long it may be). Fill the recipe with true statements up to the budget, then stop. Write to that shape — do not treat the budget as a target to reach. An artifact that would be empty is omitted entirely, heading and all. **The whole PR body is capped at 120 words** — section bodies, excluding headings and the ticket link. Every section under budget but the body over 120 still fails; drop the least load-bearing section.
 
-**The diff test — apply to every sentence of the PR body.** Before writing a sentence, ask: *could the reviewer learn this by reading the diff?* If yes, delete it. Names of new helpers, params, or values; which file the code lives in; "follows the existing convention"; what a function does mechanically — all visible in the diff, all cut. The PR body exists only for what the code cannot tell the reviewer: why, and what to watch for.
-
-See `example.md` in this directory for a full worked example of good, terse output.
+**The diff test — apply to every sentence of the PR body.** Before writing a sentence, ask: *could the reviewer learn this by reading the diff?* If yes, delete it. Names of new helpers, params, or values; which file the code lives in; "follows the existing convention"; what a function does mechanically — all visible in the diff, all cut. The PR body exists only for what the code cannot tell the reviewer: why, and what to watch for. `example.md` in this directory is a full worked example of good, terse output.
 
 ## Process
 
@@ -67,15 +65,16 @@ Build from `.github/PULL_REQUEST_TEMPLATE.md`, replacing every HTML comment with
 
 Fill a section only when its recipe has something true to say; otherwise delete that heading and body. Always keep the ticket link and Safety story. **Omit the Labels and Review section.**
 
-- **Safety story** — a neutral risk read in two lists, items only if true. Author actions in **first person** ("I exercised the happy path"); statements about the change in third person.
-  - *What gives confidence:* the author's testing (step 3, their words), narrow scope, existing coverage of the touched paths, flag-gating.
-  - *Risks to review:* migrations, behavior changes for existing users, untested paths, third-party integrations, perf-sensitive or error-handling changes, limited author testing. Note the mitigation if there is one; otherwise leave it for the reviewer.
+- **Safety story** — a neutral risk read in two lists, `**What gives confidence**` and `**Risks to review**`. Rank candidates by how much each one changes the reviewer's read and keep only the top ones, most important first — true is the floor, not the bar. Author actions in **first person** ("I exercised the happy path"); statements about the change in third person. Note a mitigation if there is one; otherwise leave it for the reviewer. `risk-categories.md` lists what to weigh.
+  **Budget:** ≤2 items per list, ≤15 words each; ≤55 words total.
 - **Technical Summary** — *only* what survives the diff test: why this approach over the obvious alternative, and any non-obvious decision, exclusion, or ordering dependency a reviewer should know before reading. If the diff already speaks for itself, omit the whole section.
-  **Budget:** 1–3 sentences.
+  **Budget:** ≤40 words.
 - **Product Description** — the user-facing behavior change.
-  **Budget:** 1–2 sentences.
+  **Budget:** ≤25 words.
 - **Automated test coverage** — what tests were added or changed and what they lock down.
-  **Budget:** 1–2 sentences.
+  **Budget:** ≤25 words.
+
+**Verify before building the body:** count the words in each drafted section and recut any that exceeds its budget — drop the lowest-ranked item, or tighten. Then sum them; if the total exceeds 120, cut the least load-bearing section whole.
 
 ### 6. Push
 
@@ -124,4 +123,5 @@ Then output the PR URL.
 - Each RELEASES.md update is its own commit, and only after the user approves the drafted bullets.
 - Omit the template's Labels and Review section.
 - Never leave the template's HTML-comment placeholders in the body.
+- Every PR body section is at or under its word budget, and the body is ≤120 words.
 - Push the branch before `gh pr create`.
