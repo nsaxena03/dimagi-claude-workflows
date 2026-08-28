@@ -22,6 +22,11 @@ be connected.
   is actually used in the repo, perform the upgrade, and open a PR with the
   changelog and assessment. Example: `/dependency-upgrade django`
 
+- `dependency-upgrade-review` — Review a Dependabot (or other dependency-bump)
+  PR: identify changed packages, research changelogs, assess breaking-change
+  and codebase impact, then post the analysis as a PR comment (after
+  confirming with you). Example: `/dependency-upgrade-review 12345`
+
 - `sprint-prep` — Prepare for the next sprint. Reviews your Jira board, walks
   through highlights and carryovers interactively, and drafts a sprint plan
   message for Slack.
