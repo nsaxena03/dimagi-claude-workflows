@@ -61,34 +61,20 @@ The point of these rules is to avoid being an early adopter of a release that mi
 
 If no version passes the safety rules, explain why and ask the user if they want to proceed anyway.
 
-## Step 3: Look Up the Changelog
+## Step 3: Look Up the Changelog and Assess Impact
 
-Find the changelog between the current version and the target version. Check these sources in order:
+Follow the **Changelog Research**, **Codebase Impact Analysis**, and **Categorizing Risk** sections of `${CLAUDE_PLUGIN_ROOT}/references/dependency-analysis.md` to research what changed between the current and target versions and how it affects this repo. Also follow that doc's **Writing About Upstream References** section when summarizing the changelog in the PR body — the PR will be posted to this repo, so bare `#<number>` references to the upstream repo need the same care.
 
-1. **PyPI/npm metadata** — look for `project_urls` (PyPI) or `repository`/`homepage` (npm) to find the GitHub repo.
-2. **GitHub Releases** — `gh api repos/<owner>/<repo>/releases` — look for releases tagged between the current and target versions.
-3. **CHANGELOG file** — check the repo root for `CHANGELOG.md`, `CHANGES.md`, `CHANGES.rst`, `HISTORY.md`, `NEWS.md`, or similar. Also check a `docs/` directory.
-
-Summarize the notable changes between the current and target versions — breaking changes, deprecations, new features, and security fixes. Don't paste the full changelog verbatim. Link to the upstream changelog or GitHub Releases page so reviewers can dig deeper if they want.
-
-If no changelog is found, note this — it's still worth proceeding, but flag it in the PR.
-
-## Step 4: Assess Impact
-
-Search the codebase to understand how the library is used. This is the most important step for reviewer confidence — the assessment should answer "could this upgrade break anything?"
-
-1. **Find all imports and usages.** For Python, search for `import <package>` and `from <package>`. For JS, search for `require('<package>')` and `import ... from '<package>'`. Count the number of files and note the main usage patterns.
-
-2. **Cross-reference with the changelog.** Look for breaking changes, deprecations, or API changes in the changelog that touch functionality the repo actually uses. This is where the value is — not just listing what changed, but whether those changes affect *this codebase*.
-
-3. **Write a short assessment** (3-5 sentences). Cover:
-   - How widely the library is used in the repo (a few files vs. everywhere)
-   - Whether any breaking changes or deprecations affect the repo's usage
-   - Overall risk level: low (patch/minor with no breaking changes in used APIs), medium (minor with some relevant changes), or high (major version or breaking changes in heavily-used APIs)
+Then **write a short assessment** (3-5 sentences) for the PR body. Cover:
+- How widely the library is used in the repo (a few files vs. everywhere)
+- Whether any breaking changes or deprecations affect the repo's usage
+- The overall risk level from the reference doc's Categorizing Risk section
 
 If the risk is high, flag it to the user before proceeding. They may want to handle it manually.
 
-## Step 5: Perform the Upgrade
+If no changelog is found, note this — it's still worth proceeding, but flag it in the PR.
+
+## Step 4: Perform the Upgrade
 
 1. **Create a branch:** `dependency-upgrade/<package>-<target_version>`
 
@@ -100,7 +86,7 @@ If the risk is high, flag it to the user before proceeding. They may want to han
 
 4. **Don't run tests** — leave that to CI. Just make sure the install/compile step succeeded without errors.
 
-## Step 6: Commit and Create PR
+## Step 5: Commit and Create PR
 
 Commit the changes and open a PR. The PR description is the main deliverable — it should give reviewers everything they need.
 
@@ -127,7 +113,7 @@ Upgrades `<package>` from `<current_version>` to `<target_version>`.
 
 ## Risk Assessment
 
-<the 3-5 sentence assessment from Step 4>
+<the 3-5 sentence assessment from Step 3>
 
 ## Changelog
 

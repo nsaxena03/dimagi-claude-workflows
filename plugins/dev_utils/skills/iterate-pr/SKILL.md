@@ -9,7 +9,7 @@ One-shot workflow: gather review feedback, fix CI failures, verify locally, comm
 
 **Requires**: GitHub CLI (`gh`) authenticated.
 
-**Important**: All scripts must be run from the repository root directory (where `.git` is located), not from the skill directory. Use the full path to the script via `${CLAUDE_SKILL_ROOT}`.
+**Important**: All scripts must be run from the repository root directory (where `.git` is located), not from the skill directory. Use the full path to the script via `${CLAUDE_SKILL_DIR}`.
 
 If `--dry-run` is in $ARGUMENTS, print the plan but make no changes (no commits, no pushes, no replies).
 
@@ -20,7 +20,7 @@ If `--dry-run` is in $ARGUMENTS, print the plan but make no changes (no commits,
 Fetches CI check status and extracts failure snippets from logs.
 
 ```bash
-uv run ${CLAUDE_SKILL_ROOT}/scripts/fetch_pr_checks.py [--pr NUMBER]
+uv run ${CLAUDE_SKILL_DIR}/scripts/fetch_pr_checks.py [--pr NUMBER]
 ```
 
 Returns JSON:
@@ -40,7 +40,7 @@ Returns JSON:
 Fetches and categorizes PR review feedback using the LOGAF scale.
 
 ```bash
-uv run ${CLAUDE_SKILL_ROOT}/scripts/fetch_pr_feedback.py [--pr NUMBER]
+uv run ${CLAUDE_SKILL_DIR}/scripts/fetch_pr_feedback.py [--pr NUMBER]
 ```
 
 Returns JSON with feedback categorized as:
@@ -60,7 +60,7 @@ Each feedback item may include:
 Replies to PR review threads. Batches multiple replies into a single GraphQL call.
 
 ```bash
-uv run ${CLAUDE_SKILL_ROOT}/scripts/reply_to_thread.py THREAD_ID "body" [THREAD_ID "body" ...]
+uv run ${CLAUDE_SKILL_DIR}/scripts/reply_to_thread.py THREAD_ID "body" [THREAD_ID "body" ...]
 ```
 
 ## Workflow
@@ -76,7 +76,7 @@ Store PR number and `{owner}/{repo}` for use in later steps. Stop if no PR exist
 
 ### 2. Gather and Address Review Feedback
 
-Run `uv run ${CLAUDE_SKILL_ROOT}/scripts/fetch_pr_feedback.py` to get categorized feedback.
+Run `uv run ${CLAUDE_SKILL_DIR}/scripts/fetch_pr_feedback.py` to get categorized feedback.
 
 **Auto-fix (no prompt):**
 - `high` - must address (blockers, security, changes requested)
@@ -118,7 +118,7 @@ If `--dry-run`: print the classification table (including the low-priority numbe
 
 ### 3. Check CI and Fix Failures
 
-Run `uv run ${CLAUDE_SKILL_ROOT}/scripts/fetch_pr_checks.py` to get structured failure data.
+Run `uv run ${CLAUDE_SKILL_DIR}/scripts/fetch_pr_checks.py` to get structured failure data.
 
 For each failure:
 1. Read the `log_snippet` and trace backwards from the error to understand WHY it failed
@@ -141,15 +141,20 @@ If local verification fails, fix before proceeding — do not push known-broken 
 
 ### 5. Commit and Push
 
-```bash
-git add <changed files>
-git commit -m "fix: address PR feedback and CI failures
+Commit the fixes as a series of logical commits, not one catch-all "address feedback and CI" commit. Group by concern: a CI fix is its own commit, and each distinct piece of review feedback (or each cluster of closely-related comments) is its own commit. This keeps each commit reviewable on its own, and it lets you cite the *exact* SHA that resolved a given thread when you reply in step 6 — a reviewer can click straight to the fix.
 
-- <bullet per change: what was changed and why>"
+Stage deliberately so unrelated fixes stay apart — `git add <files for this concern>`, or `git add -p` when one file holds fixes for different threads — rather than `git add -A`.
+
+```bash
+git add <files for this concern>
+git commit -m "fix: <what this specific concern was>"
+# repeat for each logical group, then:
 git push
 ```
 
-Store the resulting commit SHA for replies.
+Keep messages minimal — a concise subject, a body only when the *why* isn't obvious. If every fix genuinely belongs to one concern, a single commit is fine.
+
+Record which commit SHA addresses which thread/CI failure — the replies in step 6 reference these per-thread.
 
 ### 6. Reply to All Threads
 
@@ -160,10 +165,10 @@ Store the resulting commit SHA for replies.
 gh api -X POST repos/{owner}/{repo}/issues/{pr_number}/comments -f body="$REPLY_BODY"
 ```
 
-Use `${CLAUDE_SKILL_ROOT}/scripts/reply_to_thread.py` for inline threads. Batch all replies into a single call:
+Use `${CLAUDE_SKILL_DIR}/scripts/reply_to_thread.py` for inline threads. Batch all replies into a single call:
 
 ```bash
-uv run ${CLAUDE_SKILL_ROOT}/scripts/reply_to_thread.py \
+uv run ${CLAUDE_SKILL_DIR}/scripts/reply_to_thread.py \
   PRRT_abc $'Fixed — description of change.\n\n*— Claude Code*' \
   PRRT_def $'Not applicable — reason.\n\n*— Claude Code*'
 ```

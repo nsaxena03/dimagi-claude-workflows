@@ -13,19 +13,19 @@
     {
       "name": "dev-utils",
       "source": "./plugins/dev_utils",
-      "version": "1.4.7",
+      "version": "1.8.1",
       "description": "Utility commands and skills for general development"
     },
     {
       "name": "code-review",
       "source": "./plugins/code-review",
-      "version": "0.2",
+      "version": "0.5",
       "description": "Perform thorough code review"
     },
     {
       "name": "commcare-tech",
       "source": "./plugins/commcare-tech",
-      "version": "0.6.0",
+      "version": "0.6.3",
       "description": "Skills for the CommCare Tech Team"
     },
     {
